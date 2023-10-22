@@ -1,0 +1,73 @@
+<html lang="en">
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+      table {
+        border: 1px solid black;
+      }
+      th {
+        background: gray;
+        border: 1px solid;
+      }
+      td {
+        border: 1px solid;
+        padding: 10px;
+      }
+      .delete-button {
+        background: red;
+        color: white;
+        transition: all ease 0.5s;
+        border: solid;
+        border-color: red;
+        border-width: 0.5px;
+        padding: 5px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .delete-button:hover {
+        background: white;
+        color: red;
+      }
+      .edit-button {
+        background: rgb(53, 53, 188);
+        color: white;
+        transition: all ease 0.5s;
+        border: solid;
+        border-color: blue;
+        border-width: 0.5px;
+        padding: 5px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .edit-button:hover {
+        background: white;
+        color: blue;
+      }
+
+      .form-container {
+        margin-top: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      input {
+        border-radius: 10px;
+        border-width: 0.5px;
+        padding: 5px 10px;
+      }
+      #jobRequirement {
+        height: 100px;
+      }
+      .form-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    {% block content %} {% endblock %}
+  </body>
+</html>

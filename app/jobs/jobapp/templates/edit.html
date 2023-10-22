@@ -1,0 +1,4 @@
+<form method="post" action="{% url 'update'%}">
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit">Update</button>
+</form>
