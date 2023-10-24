@@ -2,8 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 from db import get_database
+import re
 
 items=[]
+index=0
 
 def scrap(url,driver):
     driver.get(url)
@@ -15,23 +17,27 @@ def scrap(url,driver):
     for div_element in div_elements:
         title=div_element.find('h2',class_="jobTitle").find('a')
         companyLocation=div_element.find('div',class_="company_location")
-        jobRequirement=[]
         metadata=[]
-        jd=div_element.find('div',class_='job-snippet')
-        if jd.ul and jd.ul.li:
-            jd=jd.ul.li
-        else :
-            jd=[]
         md=div_element.find_all('div',class_="metadata")
+        salary=0
         for l in md:
             metadata.append(l.div.text)
-        for l in jd:
-            jobRequirement.append(l.text)
+        for element in metadata:
+            patternSalary = r'₹(\d{1,2}(?:,\d{2})*(?:,\d{3})?)'
+            patternTenure=r'(a\s+(?:year|annually|month))'
+
+            # Find all matches in the text
+            salaryMatches = re.findall(patternSalary, element)
+            tenureMatches=re.findall(patternTenure,element)
+            if len(salaryMatches)==2:
+                salary+=(int(salaryMatches[0].replace(',', ''))+int(salaryMatches[1].replace(',', '')))//2
+                salary*=10
+            if(len(tenureMatches)!=0 and  tenureMatches[0]=='a month'):
+                salary*=12
         items.append({
             "jobTitle":title.span.text,
             "companyLocation":companyLocation.text,
-            "jobRequirement":jobRequirement,
-            "metadata":metadata
+            "salary":salary
         })
 
 service = Service()

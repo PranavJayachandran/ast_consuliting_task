@@ -1,27 +1,22 @@
 {% extends "base.html" %} {% block content %}
 <div>
+  <form method="get">
+    {{ form }}
+    <button type="submit">Search</button>
+  </form>
+  <div>Average Salary is : {{averageSalary}}</div>
   <table>
     <tr>
       <th>JobTitle</th>
       <th>companyLocation</th>
-      <th>Metadata</th>
-      <th>JobRequirement</th>
+      <th>salary</th>
       <th>Actions</th>
     </tr>
     {% for element in data %}
     <tr>
       <td style="width: 150px">{{element.jobTitle}}</td>
       <td style="width: 200px">{{element.companyLocation}}</td>
-      <td style="width: 80px">
-        {% for item in element.metadata %}
-        <li>{{item}}</li>
-        {% endfor %}
-      </td>
-      <td style="width: 300px">
-        {% for item in element.jobRequirement %}
-        <li>{{item}}</li>
-        {% endfor %}
-      </td>
+      <td style="widht: 100px">{{element.salary}}</td>
       <td style="display: flex; gap: 10px">
         <a href="{% url 'edit' element.id %}">
           <button class="edit-button">Edit</button>

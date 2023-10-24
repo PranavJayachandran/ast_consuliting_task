@@ -1,73 +1,36 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from . import db
+from . import utils
 from bson import ObjectId
-from .forms import JobDataForm
+from .forms import JobDataForm,SearchForm
 
 # Create your views here.
 def index(request):
-    collection=db.getCollection()
-    collection=collection.find({})
-    result_list=[]
-    for item in collection:
-        item["id"] = str(item.pop("_id"))
-        result_list.append(item)
-    # result_list=[
-    #     {
-    #         'id':1,
-    #         'jobTitle':'Title',
-    #         'companyLocation':'This is loc',
-    #         'jobRequirement':[
-    #             'this is a text',
-    #             'this is next text'
-    #         ],
-    #         'metadata':[
-    #             'sal',
-    #             'tol'
-    #         ]
-    #     },
-    #     {
-    #         'id':2,
-    #         'jobTitle':'Title',
-    #         'companyLocation':'This is loc',
-    #         'jobRequirement':[
-    #             'this is a text',
-    #             'this is next text'
-    #         ],
-    #         'metadata':[
-    #             'sal',
-    #             'tol'
-    #         ]
-    #     },
-    #     {
-    #         'id':3,
-    #         'jobTitle':'Title',
-    #         'companyLocation':'This is loc',
-    #         'jobRequirement':[
-    #             'this is a text',
-    #             'this is next text'
-    #         ],
-    #         'metadata':[
-    #             'sal',
-    #             'tol'
-    #         ]
-    #     },
-        # {
-        #     'id':4,
-        #     'jobTitle':'Title',
-        #     'companyLocation':'This is loc',
-        #     'jobRequirement':[
-        #         'this is a text',
-        #         'this is next text'
-        #     ],
-        #     'metadata':[
-        #         'sal',
-        #         'tol'
-        #     ]
-        # },
-    # ]
-    print(result_list)
-    return render(request,"index.html",{'data':result_list})
+    form=SearchForm(request.GET)
+    if form.is_valid():
+        if(form.cleaned_data['query']!=''):
+            collection=db.getCollection()
+            collection.create_index([("jobTitle", "text"),
+                                 ("companyLocation","text")])
+            collection = collection.find({"$text": {"$search": form.cleaned_data['query']}})
+            result_list=[]
+            for item in collection:
+                item["id"] = str(item.pop("_id"))
+                result_list.append(item)
+            averageSalary=utils.getAverageSalary(result_list)
+            return render(request,"index.html",{'data':result_list,'form':form,'averageSalary':averageSalary})
+        else :
+            collection=db.getCollection()
+            collection=collection.find({})
+            result_list=[]
+            for item in collection:
+                item["id"] = str(item.pop("_id"))
+                result_list.append(item)
+            averageSalary=utils.getAverageSalary(result_list)
+            return render(request,"index.html",{'data':result_list,'form':form,'averageSalary':averageSalary})
+
+    
 
 
 def delete(request,dynamic_id):
@@ -90,6 +53,7 @@ def edit(request,edit_id):
         result_list.append(item)
 
     form = JobDataForm(result_list[0])
+    form.fields['companyLocation'].widget.attrs['size'] = 100
    
     return render(request,"edit.html",{'form':form})
 
@@ -97,22 +61,13 @@ def update(request):
     if request.method=="POST":
         jobTitle = request.POST.get('jobTitle', '')
         companyLocation = request.POST.get('companyLocation', '')
-        jobRequirement = request.POST.get('jobRequirement', '')
-        metadata = request.POST.get('metadata', '')
+        salary=request.POST.get('salary','')
         id=request.POST.get('id','')
-        jR = jobRequirement[1:len(jobRequirement)-2].split(',')
-        jR = [item.strip("'").strip() for item in jR if item.strip()]        
-        
-        mR = metadata[1:len(metadata)-2].split(',')
-        mR = [item.strip("'").strip() for item in mR if item.strip()]
         updated_data = {
         'jobTitle': jobTitle,
         'companyLocation': companyLocation,
-        'jobRequirement': jR,
-        'metadata': mR,
+        'salary':salary,
         }
-
         collection=db.getCollection()
-        # Update the document based on a unique identifier (e.g., "_id")
         collection.update_one({'_id': ObjectId(id)}, {'$set': updated_data})
-        return HttpResponse("updated")
+        return redirect(index)
