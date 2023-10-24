@@ -5,8 +5,8 @@
 The first thing to do is to clone the repository:
 
 ```sh
-$ git clone https://github.com/gocardless/sample-django-app.git
-$ cd sample-django-app
+$ git https://github.com/PranavJayachandran/ast_consuliting_task.git
+$ cd app/jobs
 ```
 
 ## WebScrape
